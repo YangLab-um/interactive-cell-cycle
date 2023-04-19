@@ -41,9 +41,11 @@ def create_parameter_sliders(slider_info_dict):
         units = slider_info_dict[name]['units']
         display = dcc.Markdown(f"{name} ({units})", id=f"{name}-display",
                           style={"padding-left": "10%"})
+        tooltip = dbc.Tooltip(slider_info_dict[name]['description'], target=f"{name}-display",
+                              placement="bottom", style={"font-size": "0.8rem"})
         slider = dcc.Slider(id=f'{name}-slider', min=min_val, max=max_val,
                             step=step, value=init_val, marks=None,
                             tooltip={"placement": "bottom", "always_visible": True})
-        row = dbc.Row([ dbc.Col(display, width=3), dbc.Col(slider, width=9), ], style={"width": "100%"})
+        row = dbc.Row([ dbc.Col(display, width=3), tooltip, dbc.Col(slider, width=9), ], style={"width": "100%"})
         all_sliders.append(row)
     return all_sliders

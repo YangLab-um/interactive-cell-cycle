@@ -74,16 +74,29 @@ class Guan2008Model:
     """
 
     def __init__(self):
-        self.introduction = """The cell cycle is a fundamental biological process that ensures accurate cell divisions. 
+        self.introduction = """
+                            The cell cycle is a fundamental biological process that ensures accurate cell divisions. 
                             In a [2018 eLife article](https://elifesciences.org/articles/33549), Guan et al. led a study that established 
                             an experimental and computational platform to study the early embryonic cell cycles of *Xenopus laevis* frogs.
                             Here, we present the mathematical model developed in that article through an interactive application. 
                             This application allows the user to explore the model's behavior by changing parameters and initial conditions. 
                             The model is composed of two species, Total Cyclin B1 and Active CyclinB1:Cdk1 complex, which provides a simple 
-                            representation of the cell cycle."""
+                            representation of the cell cycle.
+                            
+                            The model is described by the following system of ordinary differential equations:
+                            $$
+                            \\frac{dB}{dt} = k_{S} - \\left( a_{D} + b_{D} \\frac{C^{n_{D}}}{C^{n_{D}} + K^{n_{D}}} \\right)B
+                            $$
+                            $$
+                            \\frac{dC}{dt} = k_{S} + \\frac{1}{\\sqrt{r_{WT}}} \\left( a_{T} + b_{T} \\frac{C^{n_{T}}}{C^{n_{T}} + K^{n_{T}}} \\right) (B - C) - \\sqrt{r_{WT}} \\left( a_{W} + b_{W} \\frac{K^{n_{W}}}{C^{n_{W}} + K^{n_{W}}} \\right) C - \\left( a_{D} + b_{D} \\frac{C^{n_{D}}}{C^{n_{D}} + K^{n_{D}}} \\right)C
+                            $$
+                            where $B$ represents the total amount of CyclinB1 and $C$ the concentration of active cyclinB1:Cdk1 complex. 
+                            Additionally, subscripts $D$, $T$, and $E$ represent the degradation, Cdc25, and Wee1 interactions respectively.
+                            """
 
         self.variables = ['B', 'C']
         self.initial_conditions = [75.0, 35.0]
+        self.simulation_time = 2000.0
         self.parameters = Parameters({
             'kS': 1.0, 
             # Ratio of Wee1 to Cdc25 activity
