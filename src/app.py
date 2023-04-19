@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
 import numpy as np
+import pandas as pd
 import plotly.express as px
 from scipy.integrate import solve_ivp
 from utils.ode_models import Parameters, Guan2008Model
@@ -11,9 +12,19 @@ from utils.model_interface import create_parameter_sliders
 
 # Initial setup
 model = Guan2008Model()
-fig_time_series = px.scatter(labels={'x': ')', 'y': ''})
-fig_phase_plane = px.scatter(labels={'x': '', 'y': ''})
-fig_reaction_rates = px.scatter(labels={'x': '', 'y': ''})
+
+df_ts = pd.DataFrame(data={'Time (min)': np.zeros(2), 'Total CyclinB1': np.zeros(2), 'Active CyclinB1:Cdk1 complex': np.zeros(2)})
+fig_time_series = px.line(df_ts, x='Time (min)', y=['Total CyclinB1', 'Active CyclinB1:Cdk1 complex'], labels={'value': 'Concentration (nM)'})
+fig_time_series.update_layout(legend=dict(title='', yanchor='top', y=1.1, xanchor='left', x=0.0, orientation='h', bgcolor='rgba(0,0,0,0)'))
+
+# TODO: Add trajectory to phase plane
+df_pp = pd.DataFrame(data={'Total CyclinB1 (nM)': np.zeros(2), 'B_nullcline': np.zeros(2), 'C_nullcline': np.zeros(2)})
+fig_phase_plane = px.line(df_pp, x='Total CyclinB1 (nM)', y=['B_nullcline', 'C_nullcline'], labels={'value': 'Active CyclinB1:Cdk1 complex (nM)'})
+fig_phase_plane.update_layout(legend=dict(title='', yanchor='top', y=1.1, xanchor='left', x=0.0, orientation='h', bgcolor='rgba(0,0,0,0)'))
+
+df_rr = pd.DataFrame(data={'Active CyclinB1:Cdk1 complex (nM)': np.zeros(2), 'Degradation' : np.zeros(2), 'Cdc25' : np.zeros(2), 'Wee1' : np.zeros(2)})
+fig_reaction_rates = px.line(df_rr, x='Active CyclinB1:Cdk1 complex (nM)', y=['Degradation', 'Cdc25', 'Wee1'], labels={'value': 'Reaction rate (nM/min)'})
+fig_reaction_rates.update_layout(legend=dict(title='', yanchor='top', y=1.1, xanchor='left', x=0.0, orientation='h', bgcolor='rgba(0,0,0,0)'))
 
 app = dash.Dash(
     __name__, 
@@ -143,43 +154,38 @@ app.layout = dbc.Container(
 @app.callback(
     [Output('time-series', 'figure'), Output('phase-plane', 'figure'), Output('reaction-rates', 'figure')],
     Input('cyclin-b1-initial-condition-slider', 'value'), Input('cdk1-initial-condition-slider', 'value'),
+    State('time-series', 'figure'), State('phase-plane', 'figure'), State('reaction-rates', 'figure'),
     [Input(f'{parameter}-slider', 'value') for parameter in model.slider_information.keys()],)
-def slider_callback(B0, C0, *parameters):
+def slider_callback(B0, C0, fig_time_series, fig_phase_plane, fig_reaction_rates, *parameters):
     parameters = [float(parameter) for parameter in parameters]
     parameter_dict = dict(zip(model.slider_information.keys(), parameters))
     model.set_parameters(parameter_dict)
     model.set_initial_conditions([float(B0), float(C0)])
-
-    # Time series plot
     solution = solve_ivp(model.equations, [0, 2000], model.initial_conditions, 
                         args=(model.parameters,), method='LSODA')
-    fig_time_series = px.scatter(labels={'x': '', 'y': ''})
-    fig_time_series.add_scatter(x=solution.t, y=solution.y[0,:], mode='lines', name='Total CyclinB1', line_color='#1f77b4')
-    fig_time_series.add_scatter(x=solution.t, y=solution.y[1,:], mode='lines', name='Active CyclinB1:Cdk1 complex', line_color='#d62728')
-    fig_time_series.update_layout(legend=dict(yanchor='top', y=1.1, xanchor='left', x=0.0, orientation='h', bgcolor='rgba(0,0,0,0)'))
-    fig_time_series.update_xaxes(title_text='Time (min)')
-    fig_time_series.update_yaxes(title_text='Concentration (nM)')
 
-    C_values = np.linspace(0, 120, 100)
+    # Time series plot
+    fig_time_series['data'][0]['x'] = solution.t
+    fig_time_series['data'][0]['y'] = solution.y[0,:]
+    fig_time_series['data'][1]['x'] = solution.t
+    fig_time_series['data'][1]['y'] = solution.y[1,:]
+
     # Phase plane plot
+    C_values = np.linspace(0, 120, 100)
     B_nullcline, C_nullcline = model.nullclines(C_values, model.parameters)
-    fig_phase_plane = px.scatter(labels={'x': '', 'y': ''})
-    fig_phase_plane.add_scatter(x=B_nullcline, y=C_values, mode='lines', name='Horizontal nullcline', line_color='#1f77b4')
-    fig_phase_plane.add_scatter(x=C_nullcline, y=C_values, mode='lines', name='Vertical nullcline', line_color='#d62728')
-    fig_phase_plane.add_scatter(x=solution.y[0,:], y=solution.y[1,:], mode='lines', name='Trajectory', line_color='#7f7f7f', line_dash='dash', opacity=0.5)
-    fig_phase_plane.update_layout(legend=dict(yanchor='top', y=1.2, xanchor='left', x=0.0, orientation='h', bgcolor='rgba(0,0,0,0)'))
-    fig_phase_plane.update_xaxes(title_text='Total Cyclin B1 (nM)' , range=[15, 110])
-    fig_phase_plane.update_yaxes(title_text='Active CyclinB1:Cdk1 (nM)', range=[0, 100])
+    fig_phase_plane['data'][0]['x'] = B_nullcline
+    fig_phase_plane['data'][0]['y'] = C_values
+    fig_phase_plane['data'][1]['x'] = C_nullcline
+    fig_phase_plane['data'][1]['y'] = C_values
 
     # Reaction rates plot
     HD, HT, HW = model.interaction_terms(C_values, model.parameters)
-    fig_reaction_rates = px.scatter(labels={'x': '', 'y': ''})
-    fig_reaction_rates.add_scatter(x=C_values, y=HD, mode='lines', name='Degradation', line_color='#1f77b4')
-    fig_reaction_rates.add_scatter(x=C_values, y=HT, mode='lines', name='Cdc25', line_color='#d62728')
-    fig_reaction_rates.add_scatter(x=C_values, y=HW, mode='lines', name='Wee1', line_color='#2ca02c')
-    fig_reaction_rates.update_layout(legend=dict(yanchor='top', y=1.1, xanchor='left', x=0.0, orientation='h', bgcolor='rgba(0,0,0,0)'))
-    fig_reaction_rates.update_xaxes(title_text='Active CyclinB1:Cdk1 (nM)')
-    fig_reaction_rates.update_yaxes(title_text='Reaction rate (nM/min)')
+    fig_reaction_rates['data'][0]['x'] = C_values
+    fig_reaction_rates['data'][0]['y'] = HD
+    fig_reaction_rates['data'][1]['x'] = C_values
+    fig_reaction_rates['data'][1]['y'] = HT
+    fig_reaction_rates['data'][2]['x'] = C_values
+    fig_reaction_rates['data'][2]['y'] = HW
 
     return fig_time_series, fig_phase_plane, fig_reaction_rates
 
