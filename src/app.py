@@ -1,13 +1,13 @@
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
+from dash.dependencies import Input, Output, State
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
 from scipy.integrate import solve_ivp
-from utils.ode_models import Parameters, Guan2008Model
+from utils.ode_models import Guan2008Model
 from utils.model_interface import create_parameter_sliders
 
 # Initial setup
@@ -129,16 +129,31 @@ app.layout = dbc.Container(
                 dbc.Col(
                     [
                         dbc.Row(
-                            dcc.Graph(id='time-series', figure=fig_time_series),
+                            dcc.Loading(
+                                children=[dcc.Graph(id='time-series', figure=fig_time_series)],
+                                parent_className='loading_wrapper',
+                                type='dot',
+                                color='#3CB371',
+                            ),
                         ),
                         dbc.Row(
                             [
                                 dbc.Col(
-                                    dcc.Graph(id='phase-plane', figure=fig_phase_plane),
+                                    dcc.Loading(
+                                        children=[dcc.Graph(id='phase-plane', figure=fig_phase_plane)],
+                                        parent_className='loading_wrapper',
+                                        type='dot',
+                                        color='#3CB371',
+                                    ),
                                     width=6,
                                 ),
                                 dbc.Col(
-                                    dcc.Graph(id='reaction-rates', figure=fig_reaction_rates),
+                                    dcc.Loading(
+                                        children=[dcc.Graph(id='reaction-rates', figure=fig_reaction_rates)],
+                                        parent_className='loading_wrapper',
+                                        type='dot',
+                                        color='#3CB371',
+                                    ),
                                     width=6,
                                 ),
                             ]
