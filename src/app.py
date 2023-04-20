@@ -16,19 +16,19 @@ model = Guan2008Model()
 df_ts = pd.DataFrame(data={'Time (min)': np.zeros(2), 'Total CyclinB1': np.zeros(2), 'Active CyclinB1:Cdk1 complex': np.zeros(2)})
 fig_time_series = px.line(df_ts, x='Time (min)', y=['Total CyclinB1', 'Active CyclinB1:Cdk1 complex'], labels={'value': 'Concentration (nM)'})
 fig_time_series.update_layout(legend=dict(title='', yanchor='top', y=1.1, xanchor='left', x=0.0, orientation='h', bgcolor='rgba(0,0,0,0)'),
-                              margin=dict(l=0, r=0, t=0, b=0, pad=0))
+                              margin=dict(l=0, r=0, t=0, b=0, pad=0), hovermode=False)
 
 df_pp = pd.DataFrame(data={'Total CyclinB1 (nM)': np.zeros(2), 'B nullcline': np.zeros(2), 'C nullcline': np.zeros(2), 'Trajectory': np.zeros(2)})
 fig_phase_plane = px.line(df_pp, x='Total CyclinB1 (nM)', y=['B nullcline', 'C nullcline', 'Trajectory'], labels={'value': 'Active CyclinB1:Cdk1 complex (nM)'},
                           line_dash='variable', line_dash_map={'B nullcline': 'solid', 'C nullcline': 'solid', 'Trajectory': 'dot'},
                           color_discrete_sequence=['#636EFA', '#EF553B', 'rgba(0,0,0,0.25)'],)
 fig_phase_plane.update_layout(legend=dict(title='', yanchor='top', y=1.1, xanchor='left', x=0.0, orientation='h', bgcolor='rgba(0,0,0,0)'),
-                              margin=dict(l=0, r=0, t=0, b=0, pad=0))
+                              margin=dict(l=0, r=0, t=0, b=0, pad=0), hovermode=False)
 
 df_rr = pd.DataFrame(data={'Active CyclinB1:Cdk1 complex (nM)': np.zeros(2), 'Degradation' : np.zeros(2), 'Cdc25' : np.zeros(2), 'Wee1' : np.zeros(2)})
 fig_reaction_rates = px.line(df_rr, x='Active CyclinB1:Cdk1 complex (nM)', y=['Degradation', 'Cdc25', 'Wee1'], labels={'value': 'Reaction rate (nM/min)'})
 fig_reaction_rates.update_layout(legend=dict(title='', yanchor='top', y=1.1, xanchor='left', x=0.0, orientation='h', bgcolor='rgba(0,0,0,0)'),
-                                 margin=dict(l=0, r=0, t=0, b=0, pad=0))
+                                 margin=dict(l=0, r=0, t=0, b=0, pad=0), hovermode=False)
 
 app = dash.Dash(
     __name__, 
