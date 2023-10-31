@@ -1,7 +1,7 @@
 # Interactive Cell Cycle Model
 This repository contains a web application that allows users to interact with a differential equation model of the cell cycle. The application allows to change parameters and initial conditions and observe changes to cell cycle dynamics in real time. The model was proposed in an [eLife article by Guan et al. in 2018](https://elifesciences.org/articles/33549) and aims to simulate the behavior of the cell cycle and how it is regulated by various proteins and signaling pathways.
 
-You can try it out online [here](https://interactive-cell-cycle.onrender.com/)!
+You can try it out online [here](https://interactive-cell-cycle.onrender.com/)! For a more responsive simulation, visit the Observable version of this app [here](https://observablehq.com/d/3ad2343ac1f69afb).
 
 The application is built using Plotly's [Dash framework](https://plotly.com/dash/). We encourage users to explore the code, modify the model, and contribute to the development of the app.
 
